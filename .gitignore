@@ -1,0 +1,10 @@
+# Source papers (purchased or otherwise copyrighted) are kept locally and
+# must never be committed. Only personal notes and extracts live here.
+*.pdf
+*.epub
+*.djvu
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
