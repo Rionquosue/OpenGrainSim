@@ -33,8 +33,8 @@ flowchart TD
 | Area | Definition |
 | --- | --- |
 | CPU | Own precision-sensitive regions, surface interactions, accurate calculations and domain control. Solve only active or invalidated regions and their required dependencies. |
-| GPU | Keep bulk state resident and perform approximate bulk calculations. Use the fastest suitable representation for each GPU architecture. |
-| Precision | Allow FP16, lower precision and custom quantization where acceptable. Choose storage and arithmetic precision independently, by region and field. |
+| GPU | Keep bulk state resident and perform approximate bulk calculations using the detected GPU's hardware acceleration. |
+| Precision | Use the highest hardware-accelerated floating point method supported by the detected GPU. |
 | Transfers | Send only changed data needed by the receiving component. Never require a full-domain CPU–GPU round trip each frame. |
 | Memory | Retain unchanged state; compact changed particles, fields and blocks into batched updates. |
 | Live communication | Exchange commands and playback data through memory-based IPC, rather than continuously writing files for Blender to read. |
@@ -42,7 +42,7 @@ flowchart TD
 | Scrubbing | Seek directly to indexed cached frames, including backwards, with bounded reconstruction work and RAM reuse. |
 | Baking | Feed computed geometry and attributes into Blender and produce a native bake through Blender's own evaluation and baking facilities. |
 
-GPU precision selection must consider interaction sensitivity and error propagation as well as distance from important surfaces. Benchmark real kernels and transfers; advertised low-precision throughput alone does not determine the fastest configuration.
+Storage compression is assessed separately from the GPU floating point method. Validate its error against interaction sensitivity and error propagation, and benchmark real kernels and transfers.
 
 ## Activity and ownership
 
