@@ -5,6 +5,7 @@ Planning material for a GPU particle solver for sand, grains, liquids and semiso
 - [concept-sheet.md](concept-sheet.md): the design (goals, architecture, GPU backend, solver, data contract, Blender side, precision, tests, phases, reading list). Exported from the shared concept-sheet doc; the doc is the editable original.
 - [../scope.md](../scope.md): current scope, including hybrid and GPU-only preview modes; takes precedence over conflicting older planning.
 - [compression_methods.md](compression_methods.md): viable CPU/GPU compression methods, selective transfers and indexed frame caching.
+- [gputable.md](gputable.md): GPU architectures, model exceptions, native floating-point capabilities and memory/compression features relevant to the solver.
 - [architecture.png](architecture.png): the architecture diagram from the concept sheet.
 - [formula-catalogue.md](formula-catalogue.md): the formulas sorted into chapters by purpose and solving method (mirrors the doc's *Formula catalogue* tab).
 - [formulatable.md](formulatable.md): every formula the solver may use, one block each, with redundant ones removed ([formulatable-removed.md](formulatable-removed.md) lists what was removed and why).
