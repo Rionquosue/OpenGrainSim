@@ -12,6 +12,27 @@ This document records the owner's clarified scope. It supersedes conflicting ass
 
 ## Architecture
 
+Two simulation modes are in scope:
+
+| Mode | Simulation ownership |
+| --- | --- |
+| Hybrid | CPU precision regions and domain control; GPU bulk simulation. |
+| GPU-only preview | All particle simulation, including surface interactions, runs on the GPU. CPU precision solving is bypassed. |
+
+GPU-only refers to simulation computation. The CPU may still manage controls, IPC, cache compression, disk writes and Blender integration. Both modes use the same particle identities and cache interface; record the mode and precision settings in cache metadata. Preview results are not assumed equivalent to hybrid results. Changing mode starts a new run unless a validated state-transfer path is provided.
+
+```mermaid
+flowchart TD
+    M["Simulation mode"] --> H["Hybrid"]
+    M --> P["GPU-only preview"]
+    H --> C["CPU precision and GPU bulk"]
+    P --> G["GPU solves all interactions"]
+    C --> O["Shared playback and cache interface"]
+    G --> O
+```
+
+Hybrid data flow:
+
 ```mermaid
 flowchart TD
     B["Blender controls and playback"] <-->|"Commands and frame data"| E["Companion executable"]
@@ -34,6 +55,7 @@ flowchart TD
 | --- | --- |
 | CPU | Own precision-sensitive regions, surface interactions, accurate calculations and domain control. Solve only active or invalidated regions and their required dependencies. |
 | GPU | Keep bulk state resident and perform approximate bulk calculations using the detected GPU's hardware acceleration. |
+| GPU-only preview | Offer an alternative that computes the entire particle simulation on the GPU, without CPU precision-region solving. |
 | Precision | Use the highest hardware-accelerated floating point method supported by the detected GPU. |
 | Transfers | Send only changed data needed by the receiving component. Never require a full-domain CPU–GPU round trip each frame. |
 | Memory | Retain unchanged state; compact changed particles, fields and blocks into batched updates. |
@@ -45,6 +67,8 @@ flowchart TD
 Storage compression is assessed separately from the GPU floating point method. Validate its error against interaction sensitivity and error propagation, and benchmark real kernels and transfers.
 
 ## Activity and ownership
+
+CPU precision-region ownership and promotion apply to hybrid mode. In GPU-only preview, all simulation regions remain GPU-owned. Both modes follow the floating point requirement above.
 
 - Distinguish **needs solving**, **needs transfer**, and **needs caching**. A changed GPU particle need not be transferred to the CPU solver.
 - Wake regions when particles arrive, neighbours change, colliders move, controls change, or solver residuals require work.
@@ -78,6 +102,8 @@ Blender's native bake is a separate output format. Do not assume it preserves ou
 
 These are candidate methods, not commitments to a particular library or backend. Existing solver alternatives remain available.
 
+See [compression methods](planning/compression_methods.md) for CPU/GPU suitability, transfer rules and cache design.
+
 | Method | Assessment | Intended use |
 | --- | --- | --- |
 | Resident state, dirty blocks and compact transfers | First implementation priority | Reduce bus traffic and unnecessary CPU work before adding complex codecs. |
@@ -99,6 +125,7 @@ Use compression on a transfer only when compression, transfer and decompression 
 4. Verify boundary ownership, wake propagation, migrations and stable IDs.
 5. Verify forward/backward reconstruction, bounded cache memory, cancellation and complete-record recovery.
 6. Bake representative frames in Blender 5.1 and verify geometry, attributes and playback after reopening.
+7. Verify GPU-only preview has no CPU physics path; measure its speed and error separately from hybrid mode.
 
 No compression ratio, particle count or frame-rate guarantee is established until measured.
 
